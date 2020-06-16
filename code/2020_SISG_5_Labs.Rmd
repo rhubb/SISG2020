@@ -1,11 +1,13 @@
 ---
-title: "Module 4: Regression Methods - Concepts and Applications"
+title: 'Module 5: Regression Methods - Concepts and Applications'
 output:
   html_document:
-    toc: false 
-    depth: 3 
-    theme: paper 
+    depth: 3
     highlight: tango
+    theme: paper
+    toc: no
+  pdf_document:
+    toc: no
 ---
 
 ```{r set-options, echo=FALSE, cache=FALSE}
@@ -47,12 +49,12 @@ chd:  diagnosis of coronary heart disease:  0 = no, 1 = yes
 
 You can download the data file and read it into R as follows:
 ```{r, eval = FALSE}
-cholesterol = read.csv("https://raw.githubusercontent.com/rhubb/SISG2019/master/data/SISG-Data-cholesterol.csv", head=T)
+cholesterol = read.csv("https://raw.githubusercontent.com/rhubb/SISG2020/master/data/SISG-Data-cholesterol.csv", head=T)
 ```
 
 ***
 ```{r, echo = FALSE}
-cholesterol = read.csv("https://raw.githubusercontent.com/rhubb/SISG2019/master/data/SISG-Data-cholesterol.csv", head=T)
+cholesterol = read.csv("https://raw.githubusercontent.com/rhubb/SISG2020/master/data/SISG-Data-cholesterol.csv", head=T)
 attach(cholesterol)
 ```
 #### Install R packages
@@ -66,7 +68,7 @@ library(gee)
 library(multcomp)
 library(lmtest)
 ```
-```{r, eval=TRUE, message = FALSE, echo = FALSE}
+```{r, eval=TRUE, warning=FALSE, message=FALSE, echo = FALSE}
 library(gee)
 library(multcomp)
 library(lmtest)
@@ -94,6 +96,8 @@ plot(TG ~ BMI, xlab = "BMI (kg/m2)", ylab = "Triglycerides (mg/dl)")
 ```{r, eval = TRUE, echo = TRUE}
 fit1 = lm(TG ~ BMI)
 summary(fit1)
+plot(TG ~ BMI, xlab = "BMI (kg/m2)", ylab = "Triglycerides (mg/dl)")
+lines(BMI, fit1$fitted.values)
 ```
 
 3\. Compute a prediction for the mean value of triglycerides at BMI = 23 as well as for a new individual with BMI = 23. How do these two intervals differ and why?

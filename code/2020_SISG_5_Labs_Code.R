@@ -1,7 +1,7 @@
-## SISG2019 R code for exercises
+## SISG2020 R code for exercises
 
 ## Load data
-cholesterol = read.csv("https://raw.githubusercontent.com/rhubb/SISG2019/master/data/SISG-Data-cholesterol.csv", head=T)
+cholesterol = read.csv("https://raw.githubusercontent.com/rhubb/SISG2020/master/data/SISG-Data-cholesterol.csv", head=T)
 attach(cholesterol)
 
 ## Install and load R packages
@@ -31,6 +31,7 @@ plot(TG ~ BMI, xlab = "BMI (kg/m2)", ylab = "Triglycerides (mg/dl)")
 fit1 = lm(TG ~ BMI)
 summary(fit1)
 confint(fit1)
+lines(BMI, fit1$fitted.values)
 
 #3.
 predict(fit1, newdata = data.frame(BMI = 23), interval = "confidence")
