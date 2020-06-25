@@ -5,12 +5,12 @@ cholesterol = read.csv("https://raw.githubusercontent.com/rhubb/SISG2020/master/
 attach(cholesterol)
 
 ## Install and load R packages
-install.packages("gee")
 install.packages("multcomp")
 install.packages("lmtest")
-library(gee)
+install.packages("sandwich")
 library(multcomp)
 library(lmtest)
+library(sandwich)
 
 ### Exercises
 
@@ -71,12 +71,8 @@ index=order(abs(dfb[,2]),decreasing=T)
 cbind(dfb[index[1:15],],BMI[index[1:15]],TG[index[1:15]])
 
 # fit a linear regression model with robust standard errors
-fit.gee = gee(TG ~ BMI, id = seq(1,length(TG)))
-summary(fit.gee)
-
-# calculate p-values for robust regression
-z = abs(fit.gee$coef/sqrt(diag(fit.gee$robust)))
-2*(1-pnorm(z))
+fit.robust = coeftest(fit1, vcov = sandwich)
+fit.robust
 
 #7
 # Summarize the variable APOE
@@ -131,7 +127,7 @@ anova(fit1)
 oneway.test(chol ~ factor(rs4775401))
 
 # Using robust standard errors
-summary(gee(chol ~ factor(rs4775401), id=seq(1,length(chol))))
+coeftest(fit1, vcov = sandwich)
 
 # Non-parametric ANOVA
 kruskal.test(chol ~ factor(rs4775401))
@@ -201,16 +197,12 @@ lrtest(glm.mod2,glm.mod3)
 #16.
 # relative risk regression for the association between rs174548 and hypertension
 # adjusting for triglycerides
-glm.mod4 <- gee(HTN ~ TG+factor(rs174548), family = "poisson", id = seq(1,nrow(cholesterol)))
-summary(glm.mod4)
+glm.mod4 <- glm(HTN ~ TG+factor(rs174548), family = "poisson")
+coeftest(glm.mod4, vcov = sandwich)
 exp(glm.mod4$coef)
-p <- 2*(1-pnorm(abs(glm.mod4$coef)/sqrt(diag(glm.mod4$robust.variance))))
-p
 
 #17.
 # risk difference regression for the association between rs174548 and hypertension
 # adjusting for triglycerides
-glm.mod5 <- gee(HTN ~ TG+factor(rs174548), id = seq(1,nrow(cholesterol)))
-summary(glm.mod5)
-p <- 2*(1-pnorm(abs(glm.mod5$coef)/sqrt(diag(glm.mod5$robust.variance))))
-p
+glm.mod5 <- lm(HTN ~ TG+factor(rs174548))
+coeftest(glm.mod5, vcov = sandwich)

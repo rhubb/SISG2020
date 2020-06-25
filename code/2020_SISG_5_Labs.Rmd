@@ -58,20 +58,20 @@ cholesterol = read.csv("https://raw.githubusercontent.com/rhubb/SISG2020/master/
 attach(cholesterol)
 ```
 #### Install R packages
-- For these labs you will need the _gee_, _multcomp_ and _lmtest_ packages.
+- For these labs you will need the _multcomp_,  _lmtest_, and _sandwich_ packages.
 - If you have not already, install these packages first. You will then need to load the package each time you execute your R script.
 ```{r, eval=FALSE}
-install.packages("gee")
 install.packages("multcomp")
 install.packages("lmtest")
-library(gee)
+install.packages("sandwich")
 library(multcomp)
 library(lmtest)
+library(sandwich)
 ```
 ```{r, eval=TRUE, warning=FALSE, message=FALSE, echo = FALSE}
-library(gee)
 library(multcomp)
 library(lmtest)
+library(sandwich)
 ```
 
 ### Exercises
@@ -105,7 +105,7 @@ lines(BMI, fit1$fitted.values)
 predict(fit1, newdata = data.frame(BMI = 23), interval = "confidence")
 predict(fit1, newdata = data.frame(BMI = 23), interval = "prediction")
 ```
-
+***
 4\. What is the $R^2$ value for the regression of triglycerides on BMI? What does this value tell you about the relationship between these two variables?
 ```{r, eval = TRUE, echo = TRUE}
 fit1 = lm(TG ~ BMI)
@@ -145,14 +145,10 @@ index=order(abs(dfb[,2]),decreasing=T)
 cbind(dfb[index[1:15],],BMI[index[1:15]],TG[index[1:15]])
 
 # fit a linear regression model with robust standard errors
-fit.gee = gee(TG ~ BMI, id = seq(1,length(TG)))
-summary(fit.gee)
-
-# calculate p-values for robust regression
-z = abs(fit.gee$coef/sqrt(diag(fit.gee$robust)))
-2*(1-pnorm(z))
+fit.robust = coeftest(fit1, vcov = sandwich)
+fit.robust
 ```
-
+***
 7\.	Summarize the variable APOE. Create a new binary variable indicating presence of the APOE e4 allele (APOE = 3, 5, or 6). Investigate the association between triglycerides and BMI adjusting for presence of the APOE e4 allele. What do the linear regression model results tell you about the adjusted association? Make sure you can interpret the model coefficients and any hypothesis testing.
 ```{r, eval = TRUE, echo = TRUE}
 # Summarize the variable APOE
@@ -215,7 +211,7 @@ anova(fit1)
 oneway.test(chol ~ factor(rs4775401))
 
 # Using robust standard errors
-summary(gee(chol ~ factor(rs4775401), id=seq(1,length(chol))))
+coeftest(fit1, vcov = sandwich)
 
 # Non-parametric ANOVA
 kruskal.test(chol ~ factor(rs4775401))
@@ -301,19 +297,15 @@ lrtest(glm.mod2,glm.mod3)
 ```{r, eval = TRUE, echo = TRUE}
 # relative risk regression for the association between rs174548 and hypertension
 # adjusting for triglycerides
-glm.mod4 <- gee(HTN ~ TG+factor(rs174548), family = "poisson", id = seq(1,nrow(cholesterol)))
-summary(glm.mod4)
+glm.mod4 <- glm(HTN ~ TG+factor(rs174548), family = "poisson")
+coeftest(glm.mod4, vcov = sandwich)
 exp(glm.mod4$coef)
-p <- 2*(1-pnorm(abs(glm.mod4$coef)/sqrt(diag(glm.mod4$robust.variance))))
-p
 ```
 
 17\.	Use a GLM to estimate the risk difference for hypertension according to rs174548 genotypes, adjusting for triglyceries. Make sure you can interpret the coefficients. How do these results compare to the results of the logistic regression and relative risk regression analyses?
 ```{r, eval = TRUE, echo = TRUE}
 # risk difference regression for the association between rs174548 and hypertension
 # adjusting for triglycerides
-glm.mod5 <- gee(HTN ~ TG+factor(rs174548), id = seq(1,nrow(cholesterol)))
-summary(glm.mod5)
-p <- 2*(1-pnorm(abs(glm.mod5$coef)/sqrt(diag(glm.mod5$robust.variance))))
-p
+glm.mod5 <- lm(HTN ~ TG+factor(rs174548))
+coeftest(glm.mod5, vcov = sandwich)
 ```
